@@ -1,0 +1,5 @@
+// settings.gradle 檔案內容
+rootProject.name = 'Divination-spring-project'
+
+// 💡 必須包含 app 模組，這樣 Gradle 才知道要去 app 資料夾下找 build.gradle
+include 'app'

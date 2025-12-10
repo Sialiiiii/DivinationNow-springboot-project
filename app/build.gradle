@@ -1,0 +1,58 @@
+plugins {
+    id 'org.springframework.boot' version '3.2.0' 
+    id 'io.spring.dependency-management' version '1.1.5'
+    id 'java'
+}
+
+group = 'divination.spring.project' // 專案群組名稱
+version = '0.0.1-SNAPSHOT'        // 專案版本
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21) 
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+dependencies {
+    // ====================== Spring Boot Starter 依賴 ======================
+    
+    // 1. Web 應用程式 (建立 RESTful API)
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    
+    // 2. Spring Data JPA (資料庫操作)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    
+    // 3. Spring Security (安全認證，JWT 的基礎)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    
+    // 4. Validation (用於檢查 DTO/API 傳入參數的合法性，例如 Email 格式)
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // ====================== 資料庫和工具 ======================
+    
+    // 5. MySQL 連接器
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // 6. 開發熱部署工具 (開發時修改代碼會自動重啟)
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    
+    // ====================== JWT 函式庫  ======================
+    
+    // 7. JJWT 函式庫 (用於生成和解析 Token)
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+    
+    // ====================== 測試依賴 ======================
+    
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
