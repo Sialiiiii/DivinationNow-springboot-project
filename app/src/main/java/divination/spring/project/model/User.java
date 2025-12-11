@@ -69,11 +69,10 @@ public class User implements UserDetails { // 實作 UserDetails 介面
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    // 🚀 修正點 1: 移除原有的 getPassword()，使用底下的 @Override 版本
-
     public void setPassword(String password) { this.password = password; }
     
-    // 🚀 修正點 2: 將 getUsername() 統一為 @Override 版本
+    // 🚀 修正點：JPA Getter for 暱稱 (username)
+    public String getUsernameJPA() { return username; } // 這是暱稱的 Getter
     
     public void setUsername(String username) { this.username = username; } 
     
@@ -95,24 +94,22 @@ public class User implements UserDetails { // 實作 UserDetails 介面
     public void setRelationshipStatusId(Integer relationshipStatusId) { this.relationshipStatusId = relationshipStatusId; }
 
 
-    // --- UserDetails 介面實現 (與 JPA Getter/Setter 衝突的已合併) ---
+    // --- UserDetails 介面實現 (關鍵) ---
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 根據 role 屬性返回權限列表
         return List.of(new SimpleGrantedAuthority(role));
     }
 
-    // 🚀 修正點 3: 實現 UserDetails 介面所需的 getPassword()
     @Override
     public String getPassword() {
-        return password; // 這是 password hash，同時也是 Entity 的 Getter
+        return password; // 返回密碼雜湊
     }
     
-    // 🚀 修正點 4: 實現 UserDetails 介面所需的 getUsername()
+    // 🚀 關鍵修正：將帳號設置為 Email，這是 Spring Security 比對登入憑證的依據
     @Override
     public String getUsername() {
-        return username; // 同時作為 Entity 的 Getter
+        return email; 
     }
 
     @Override

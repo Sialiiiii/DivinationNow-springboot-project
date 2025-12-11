@@ -1,11 +1,9 @@
 package divination.spring.project.config;
 
-import java.io.IOException; // 🚀 新增: IOException 導入
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest; // 🚀 新增: HttpServletRequest 導入
-import jakarta.servlet.http.HttpServletResponse; // 🚀 新增: HttpServletResponse 導入
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,113 +11,111 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException; // 🚀 新增: AuthenticationException 導入
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder; // 引入 PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint; // 🚀 新增: BasicAuthenticationEntryPoint 導入
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-  private final JwtAuthenticationFilter jwtAuthFilter;
-  private final UserDetailsService userDetailsService;
-  private final PasswordEncoder passwordEncoder;
+    private final UserDetailsService userDetailsService;
 
+    public SecurityConfig(UserDetailsService userDetailsService) { 
+        this.userDetailsService = userDetailsService;
+    }
+    
+  
 
-  public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, 
-             UserDetailsService userDetailsService, 
-             PasswordEncoder passwordEncoder) { 
-    this.jwtAuthFilter = jwtAuthFilter;
-    this.userDetailsService = userDetailsService;
-    this.passwordEncoder = passwordEncoder;
-  }
+    /**
+     * 核心安全過濾鏈配置
+     */
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            // 禁用 CSRF
+            .csrf(AbstractHttpConfigurer::disable)
+            // 啟用 CORS
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            
+            // Session 登入配置 (讓 Spring Security 處理登入和 Session 建立)
+            .formLogin(form -> form
+                .loginProcessingUrl("/auth/login") 
+                .usernameParameter("email") 
+                // 登入成功處理
+                .successHandler((request, response, authentication) -> {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.setContentType("application/json;charset=UTF-8");
+                    // 返回使用者資訊，以便前端更新 Pinia Store
+                    String responseBody = String.format("{\"id\": 1, \"email\": \"%s\", \"message\": \"登入成功\"}", 
+                                                      authentication.getName());
+                    response.getWriter().write(responseBody);
+                })
+                // 登入失敗處理
+                .failureHandler((request, response, exception) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"message\":\"帳號或密碼錯誤\"}");
+                })
+                .permitAll()
+            )
 
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-      // 關閉 CSRF (適用於 API 服務)
-      .csrf(AbstractHttpConfigurer::disable)
-      
-      // 配置 CORS (使用 corsConfigurationSource bean)
-      .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-      
-             // 🚀 關鍵修正區塊：處理認證失敗 (401)
+            // 配置認證失敗處理 (未登入存取受保護資源時)
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(new BasicAuthenticationEntryPoint() {
                     @Override
                     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 返回 401
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
                         response.setContentType("application/json;charset=UTF-8");
-                        response.getWriter().write("{\"message\":\"Authentication failed: Invalid or missing token.\"}");
+                        response.getWriter().write("{\"message\":\"您未登入或 Session 已失效\"}");
                     }
                 })
             )
 
-      // 配置授權規則
-      .authorizeHttpRequests(auth -> auth
-        // 1. 允許所有 /auth/ 路徑 (註冊、登入)
-        .requestMatchers("/auth/**").permitAll() 
-        
-        // 2. 允許 /images/** 路徑 (圖片服務)
-        .requestMatchers("/images/**").permitAll() 
-        
-        // 3. 允許 GET 占卜資料 (讀取籤詩列表) 是公開的
-        .requestMatchers(HttpMethod.GET, "/divination/**").permitAll()
-        
-        // 4. 🚀 關鍵修正：所有 POST (紀錄) 請求都需要驗證
-        .requestMatchers(HttpMethod.POST, "/divination/**").authenticated() 
+            // 配置授權規則
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/**").permitAll() 
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() 
+                // 所有其他路徑都需要認證
+                .anyRequest().authenticated()
+            );
+            
+        return http.build();
+    }
 
-        // 5. 允許 OPTIONS 預檢請求 (CORS)
-        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() 
+    /**
+     * CORS 配置 Bean：允許前端跨域存取並允許攜帶 Cookie
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
         
-        // 6. 其他所有請求都需要驗證
-        .anyRequest().authenticated()
-      )
-      .sessionManagement(session -> session
-        // 禁用 Session
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-      )
-      .authenticationProvider(authenticationProvider()) 
-      // 在 UsernamePasswordAuthenticationFilter 之前加入 JWT 過濾器
-      .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); 
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true); 
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
-    return http.build();
-  }
-
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    
-    // 🚀 修正點：替換通配符 "*" 為明確的前端來源
-    // 前端運行在 Vite 伺服器 (預設 5173)，因為要傳遞憑證，必須明確指定來源。
-    configuration.setAllowedOrigins(List.of("http://localhost:5173")); 
-    
-    // 允許所有方法，包括 OPTIONS
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    // 允許所有Header
-    configuration.setAllowedHeaders(List.of("*"));
-    // 允許傳遞憑證
-    configuration.setAllowCredentials(true); 
-    
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    // 對所有路徑應用此配置
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-  }
-
-  // 定義 Authentication Provider Bean
-  @Bean
-  public DaoAuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    authProvider.setUserDetailsService(userDetailsService); 
-    authProvider.setPasswordEncoder(passwordEncoder); 
-    return authProvider;
-  }
+    /**
+     * 認證提供者 (DaoAuthenticationProvider)
+     */
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService); 
+        authProvider.setPasswordEncoder(passwordEncoder); 
+        return authProvider;
+    }
 }
