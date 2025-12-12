@@ -1,81 +1,59 @@
 package divination.spring.project.service;
 
+import divination.spring.project.model.DivinationLog;
+import divination.spring.project.repository.DivinationLogRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import divination.spring.project.model.DivinationLog;
-import divination.spring.project.model.RuneDoubleLog;
-import divination.spring.project.model.RuneSingleLog;
-import divination.spring.project.repository.DivinationLogRepository;
-import divination.spring.project.repository.RuneDoubleLogRepository;
-import divination.spring.project.repository.RuneSingleLogRepository;
 
 @Service
 public class LogService {
 
-    private final DivinationLogRepository divinationLogRepository;
-    private final RuneSingleLogRepository runeSingleLogRepository;
-    private final RuneDoubleLogRepository runeDoubleLogRepository;
+    private final DivinationLogRepository logRepository;
 
-    public LogService(DivinationLogRepository divinationLogRepository, 
-                      RuneSingleLogRepository runeSingleLogRepository,
-                      RuneDoubleLogRepository runeDoubleLogRepository) {
-        this.divinationLogRepository = divinationLogRepository;
-        this.runeSingleLogRepository = runeSingleLogRepository;
-        this.runeDoubleLogRepository = runeDoubleLogRepository;
+    public LogService(DivinationLogRepository logRepository) {
+        this.logRepository = logRepository;
     }
 
     /**
-     * 儲存單顆盧恩符文占卜紀錄
+     * 儲存六十甲子籤的占卜紀錄
      */
     @Transactional
-    public DivinationLog saveRuneSingleLog(Long userId, RuneSingleLog singleLog) {
-        // 1. 儲存 RuneSingleLog
-        RuneSingleLog savedRuneLog = runeSingleLogRepository.save(singleLog);
-
-        // 2. 儲存 DivinationLog (主日誌)
-        DivinationLog mainLog = new DivinationLog();
-        mainLog.setUserId(userId);
-        mainLog.setDivinationType("RUNE_SINGLE");
-        mainLog.setResultTable("rune_single_logs");
-        mainLog.setResultId(savedRuneLog.getSingleLogId());
-
-        return divinationLogRepository.save(mainLog);
+    public DivinationLog saveJiaziSignLog(Long userId, Integer signId) {
+        // 直接使用泛用方法存檔
+        return saveDivinationLog(
+            userId, 
+            "六十甲子籤", 
+            "fortunestick_jiazi", // 確保表格名稱正確
+            signId
+        );
+    }
+    
+    /**
+     * 儲存盧恩符文單顆占卜結果
+     */
+    @Transactional
+    public DivinationLog saveRuneOneLog(Long userId, Integer orientationId) {
+        // 直接使用泛用方法存檔
+        return saveDivinationLog(
+            userId,
+            "盧恩符文(單指引)", 
+            "rune_orientations", // 確保表格名稱正確
+            orientationId
+        );
     }
 
     /**
-     * 儲存雙顆盧恩符文占卜紀錄
+     * 泛用儲存方法：對應 divination_logs 的六個核心欄位
      */
     @Transactional
-    public DivinationLog saveRuneDoubleLog(Long userId, RuneDoubleLog doubleLog) {
-        // 1. 儲存 RuneDoubleLog
-        RuneDoubleLog savedRuneLog = runeDoubleLogRepository.save(doubleLog);
-
-        // 2. 儲存 DivinationLog (主日誌)
-        DivinationLog mainLog = new DivinationLog();
-        mainLog.setUserId(userId);
-        mainLog.setDivinationType("RUNE_DOUBLE");
-        mainLog.setResultTable("rune_double_logs");
-        mainLog.setResultId(savedRuneLog.getLogId());
-
-        return divinationLogRepository.save(mainLog);
-    }
-
-    /**
-     * 🚀 新增：儲存六十甲子籤占卜紀錄
-     * 籤詩 ID 直接寫入 result_id，result_table 記錄來源表名
-     */
-    @Transactional
-    public DivinationLog saveJiaziSignLog(Long userId, Long signId) {
+    public DivinationLog saveDivinationLog(Long userId, String type, String tableName, Integer resultId) {
+        // 創建 DivinationLog 實體並賦值
+        DivinationLog log = new DivinationLog();
+        log.setUserId(userId);
+        log.setDivinationType(type);
+        log.setResultTable(tableName);
+        log.setResultId(resultId);
         
-        // 這裡不需要額外的 Log 表，因為結果 (signId) 已經是最終的 ID
-        
-        DivinationLog mainLog = new DivinationLog();
-        mainLog.setUserId(userId);
-        mainLog.setDivinationType("JIAZI_STICK");
-        mainLog.setResultTable("fortunestick_jiazi"); // 資料表名稱
-        mainLog.setResultId(signId); // 籤詩的 PK (jiazi_sign_id)
-
-        return divinationLogRepository.save(mainLog);
+        return logRepository.save(log);
     }
 }

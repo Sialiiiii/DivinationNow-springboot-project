@@ -13,12 +13,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder; // 引入 PasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import divination.spring.project.model.User;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -54,9 +55,18 @@ public class SecurityConfig {
                 .successHandler((request, response, authentication) -> {
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.setContentType("application/json;charset=UTF-8");
-                    // 返回使用者資訊，以便前端更新 Pinia Store
-                    String responseBody = String.format("{\"id\": 1, \"email\": \"%s\", \"message\": \"登入成功\"}", 
-                                                      authentication.getName());
+                    
+                    User user = (User) authentication.getPrincipal();
+
+                    String responseBody = String.format(
+                        "{\"id\": %d, \"email\": \"%s\", \"username\": \"%s\", \"careerStatusId\": %d, \"relationshipStatusId\": %d, \"message\": \"登入成功\"}", 
+                        user.getId(),
+                        user.getEmail(),
+                        user.getUsername(),
+                        user.getCareerStatusId(),
+                        user.getRelationshipStatusId()
+                    );
+                    
                     response.getWriter().write(responseBody);
                 })
                 // 登入失敗處理

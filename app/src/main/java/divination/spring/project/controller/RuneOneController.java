@@ -1,13 +1,23 @@
 package divination.spring.project.controller;
 
-import divination.spring.project.model.RuneOrientation;
-import divination.spring.project.service.RuneOneService; // 引用新的 Service
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import divination.spring.project.dto.RuneOneLogRequest;
+import divination.spring.project.model.DivinationLog;
+import divination.spring.project.model.RuneOrientation;
+import divination.spring.project.model.User;
+import divination.spring.project.service.LogService;
+import divination.spring.project.service.RuneOneService;
 
 /**
  * 盧恩符文單顆占卜 API
@@ -17,9 +27,11 @@ import java.util.List;
 public class RuneOneController {
 
     private final RuneOneService service;
+    private final LogService logService;
 
-    public RuneOneController(RuneOneService service) {
+    public RuneOneController(RuneOneService service, LogService logService) {
         this.service = service;
+        this.logService = logService;
     }
 
     /**
@@ -30,5 +42,53 @@ public class RuneOneController {
     public ResponseEntity<List<RuneOrientation>> getAllRuneData() {
         List<RuneOrientation> runes = service.getAllRuneOrientations();
         return ResponseEntity.ok(runes);
+    }
+
+
+
+
+/**
+     * POST /divination/runesone/log
+     * 紀錄盧恩單顆占卜結果
+     * * ⭐️ 修正：直接接收 orientationId 作為請求體，不再使用 DTO
+     * ⭐️ 修正：不再依賴前端傳遞 user_id
+     */
+    @PostMapping("/runesone/log")
+    public ResponseEntity<Map<String, Object>> saveRuneLog(
+        @AuthenticationPrincipal User currentUser, 
+        @RequestBody RuneOneLogRequest request 
+    ) {
+        
+        // 檢查使用者是否已認證
+        if (currentUser == null || currentUser.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "User not authenticated. Please log in."));
+        }
+        
+        // 2. 獲取核心參數
+        Long userId = currentUser.getId();
+        Long orientationIdLong = request.getOrientationId();
+        
+        if (orientationIdLong == null) {
+             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Missing required field: orientationId."));
+        }
+        
+        try {
+            Integer signId = orientationIdLong.intValue(); 
+            
+            DivinationLog mainLog = logService.saveRuneOneLog(userId, signId);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                Map.of("message", "Rune Log saved successfully", 
+                        "log_id", mainLog.getLogId())
+            );
+
+        } catch (ClassCastException e) {
+             // 處理 Long 轉 Integer 溢位（雖然籤詩 ID 不可能溢位，但這是好習慣）
+             System.err.println("Error casting sign ID: " + e.getMessage());
+             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Invalid sign ID format."));
+        } catch (Exception e) {
+            System.err.println("Error saving Rune log for user " + userId + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Log failed due to server error. " + e.getMessage()));
+        }
     }
 }

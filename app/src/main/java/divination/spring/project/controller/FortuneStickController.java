@@ -2,17 +2,20 @@ package divination.spring.project.controller;
 
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder; // 引入 SecurityContextHolder
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import divination.spring.project.dto.JiaziSignLogRequest;
 import divination.spring.project.model.DivinationLog;
 import divination.spring.project.model.JiaziSign;
+import divination.spring.project.model.User;
 import divination.spring.project.service.FortuneStickService;
 import divination.spring.project.service.LogService;
 
@@ -45,51 +48,43 @@ public class FortuneStickController {
     /**
      * POST /divination/fortunestickjiazi/log
      * 紀錄六十甲子籤占卜結果
-     * 這是受保護的 API，需要 JWT 認證。
      */
     @PostMapping("/fortunestickjiazi/log")
     public ResponseEntity<Map<String, Object>> saveJiaziSignLog(
-        @RequestBody Map<String, Object> payload
+        @AuthenticationPrincipal User currentUser, 
+        @RequestBody JiaziSignLogRequest request 
     ) {
         
-        // 1. 🚨 關鍵修正：直接從 Security Context 獲取 Long userId
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = null;
-
-        if (principal instanceof Long) {
-            userId = (Long) principal;
-        } else if (principal instanceof Integer) {
-            userId = ((Integer) principal).longValue();
-        } 
-
-        // 如果無法取得 Long 類型的 userId，則返回錯誤
-        if (userId == null || principal.equals("anonymousUser")) {
-            System.err.println("FATAL: Principal is null or wrong type. Cannot cast to Long userId. Class: " + (principal != null ? principal.getClass().getName() : "null"));
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "User ID retrieval failed. Please relog."));
+        // 檢查使用者是否已認證
+        if (currentUser == null || currentUser.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "User not authenticated. Please log in."));
+        }
+        
+        Long userId = currentUser.getId(); 
+        Long signIdLong = request.getSignId(); // 從 DTO 獲取 Long 型別的 ID
+        
+        if (signIdLong == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Missing required field: signId."));
         }
         
         try {
-            // 2. 從 Request Body 中讀取籤詩 ID
-            Long signId = null;
-            Object signIdObj = payload.get("sign_id");
+            // ⭐️ 關鍵修正: 將 Long 轉換為 Integer，以匹配 LogService 的方法簽名
+            Integer signId = signIdLong.intValue(); 
             
-            if (signIdObj instanceof Number) {
-                signId = ((Number) signIdObj).longValue();
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Missing or invalid required field (sign_id)."));
-            }
-
-            // 3. 呼叫 LogService 儲存紀錄
             DivinationLog mainLog = logService.saveJiaziSignLog(userId, signId);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(
                 Map.of("message", "Jiazi Sign Log saved successfully", 
-                    "log_id", mainLog.getLogId())
+                        "log_id", mainLog.getLogId())
             );
 
+        } catch (ClassCastException e) {
+             // 處理 Long 轉 Integer 溢位（雖然籤詩 ID 不可能溢位，但這是好習慣）
+             System.err.println("Error casting sign ID: " + e.getMessage());
+             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Invalid sign ID format."));
         } catch (Exception e) {
             System.err.println("Error saving Jiazi sign log for user " + userId + ": " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Log failed due to server error: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Log failed due to server error. " + e.getMessage()));
         }
     }
 }

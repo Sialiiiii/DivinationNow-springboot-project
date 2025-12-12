@@ -1,12 +1,13 @@
 package divination.spring.project.service;
 
-import divination.spring.project.model.JiaziSign;
-import divination.spring.project.repository.JiaziSignRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import divination.spring.project.model.JiaziSign;
+import divination.spring.project.repository.JiaziSignRepository;
 
 @Service
 public class FortuneStickService {

@@ -6,14 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import divination.spring.project.model.RuneOrientation;
-import divination.spring.project.repository.RuneOrientationRepository;
+import divination.spring.project.repository.RuneSingleLogRepository;
 
 @Service
 public class RuneOneService {
-    private final RuneOrientationRepository repository;
+    private final RuneSingleLogRepository repository;
 
     @Autowired
-    public RuneOneService(RuneOrientationRepository repository) {
+    public RuneOneService(RuneSingleLogRepository repository) {
         this.repository = repository;
     }
 
@@ -22,7 +22,6 @@ public class RuneOneService {
      * @return 包含所有答案物件的列表
      */
     public List<RuneOrientation> getAllRuneOrientations() {
-        // 直接使用 JpaRepository 提供的 findAll() 方法
         return repository.findAll();
     }
 }
