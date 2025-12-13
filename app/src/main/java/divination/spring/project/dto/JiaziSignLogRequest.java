@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JiaziSignLogRequest {
     
-    // 🚀 關鍵：使用 @JsonProperty 註解來匹配前端的 snake_case 命名
+    // 使用 @JsonProperty 註解來匹配前端的 snake_case 命名
     // 這樣即使前端傳送 "sign_id"，Java 內部也能正確 mapping 到 signId
     @JsonProperty("sign_id") 
     private Long signId; 

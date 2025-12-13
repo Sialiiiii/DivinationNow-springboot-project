@@ -54,30 +54,4 @@ public class AuthController {
         }
     }
 
-    /**
-     * 🚀 登入邏輯 (Session 模式)
-     * 認證成功後，Spring Security 會自動在 Response Header 中設置 JSESSIONID Cookie。
-     * 此方法返回 User 資料，供前端 Pinia 儲存會員狀態。
-     */
-    // @PostMapping("/login")
-    // public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest loginRequest) {
-    //     try {
-    //         User authenticatedUser = authService.loginUser(
-    //             loginRequest.getEmail(),
-    //             loginRequest.getPassword()
-    //         );
-            
-    //         Map<String, Object> response = new HashMap<>();
-            
-    //         response.put("id", authenticatedUser.getId()); 
-    //         response.put("username", authenticatedUser.getUsername());
-    //         response.put("careerStatusId", authenticatedUser.getCareerStatusId());
-    //         response.put("relationshipStatusId", authenticatedUser.getRelationshipStatusId());
-
-    //         return ResponseEntity.ok(response);
-
-    //     } catch (Exception e) {
-    //         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
-    //     }
-    // }
 }

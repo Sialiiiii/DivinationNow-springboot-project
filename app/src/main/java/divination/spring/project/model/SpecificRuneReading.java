@@ -19,7 +19,7 @@ public class SpecificRuneReading {
 
 
     @Column(name = "status_id", nullable = false)
-    private Integer userStatusId; // 匹配資料表欄位 status_id
+    private Integer statusId; // 匹配資料表欄位 status_id
 
     @Column(name = "is_current_status_position", nullable = false)
     private Integer isCurrentStatusPosition; // 牌位: 1=現況/基礎, 0=建議/指引
@@ -36,8 +36,8 @@ public class SpecificRuneReading {
     public Integer getOrientationId() { return orientationId; }
     public void setOrientationId(Integer orientationId) { this.orientationId = orientationId; }
 
-    public Integer getUserStatusId() { return userStatusId; }
-    public void setUserStatusId(Integer userStatusId) { this.userStatusId = userStatusId; }
+    public Integer getStatusId() { return statusId; }
+    public void setStatusId(Integer statusId) { this.statusId = statusId; }
 
     public Integer getIsCurrentStatusPosition() { return isCurrentStatusPosition; }
     public void setIsCurrentStatusPosition(Integer isCurrentStatusPosition) { this.isCurrentStatusPosition = isCurrentStatusPosition; }

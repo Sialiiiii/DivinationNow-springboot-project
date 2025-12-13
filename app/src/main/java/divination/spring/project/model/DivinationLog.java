@@ -15,7 +15,7 @@ public class DivinationLog {
     private Long userId; // 外鍵，引用 users 表
 
     @Column(name = "divination_type", nullable = false)
-    private String divinationType; // 例如: "Rune Single"
+    private String divinationType;
 
     @Column(name = "divination_time", nullable = false)
     private LocalDateTime divinationTime = LocalDateTime.now();
@@ -28,9 +28,10 @@ public class DivinationLog {
     @Column(name = "result_table", nullable = false)
     private String resultTable;
     
-    // 省略 Getter/Setter/Constructors 保持簡潔...
+    @Column(name = "question", columnDefinition = "VARCHAR(255)") 
+    private String question; // 欄位已存在
 
-    // 完整的 Getter/Setter 需根據您的需求添加
+    // --- Getters and Setters ---
     public Long getLogId() { return logId; }
     public void setUserId(Long userId) { this.userId = userId; }
     public void setDivinationType(String divinationType) { this.divinationType = divinationType; }
@@ -41,4 +42,17 @@ public class DivinationLog {
     public Integer getResultId() { return resultId; }
     public String getResultTable() { return resultTable; }
     public LocalDateTime getDivinationTime() { return divinationTime; }
+    public void setDivinationTime(LocalDateTime divinationTime) { 
+        this.divinationTime = divinationTime;
+    }
+    
+    // ⭐ 修正點 1: 移除拋出異常的代碼，直接返回欄位值
+    public String getQuestion() {
+        return question; 
+    }
+    
+    // ⭐ 修正點 2: 新增 setQuestion(String) 方法 (解決錯誤 #2)
+    public void setQuestion(String question) {
+        this.question = question;
+    }
 }

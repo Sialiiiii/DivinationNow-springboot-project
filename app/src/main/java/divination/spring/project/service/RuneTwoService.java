@@ -20,7 +20,7 @@ public class RuneTwoService {
      * 獲取特定情境下的符文解讀
      */
     public Optional<SpecificRuneReading> getSpecificRuneReading(Integer orientationId, Integer statusId, Integer position) {
-        return readingRepository.findByOrientationIdAndUserStatusIdAndIsCurrentStatusPosition(
+        return readingRepository.findByOrientationIdAndStatusIdAndIsCurrentStatusPosition(
                 orientationId, statusId, position);
     }
 }

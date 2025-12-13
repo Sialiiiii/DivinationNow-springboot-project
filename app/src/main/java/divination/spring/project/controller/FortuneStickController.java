@@ -68,7 +68,7 @@ public class FortuneStickController {
         }
         
         try {
-            // ⭐️ 關鍵修正: 將 Long 轉換為 Integer，以匹配 LogService 的方法簽名
+            // 將 Long 轉換為 Integer，以匹配 LogService 的方法簽名
             Integer signId = signIdLong.intValue(); 
             
             DivinationLog mainLog = logService.saveJiaziSignLog(userId, signId);

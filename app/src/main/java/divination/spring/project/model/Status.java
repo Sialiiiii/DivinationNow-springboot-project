@@ -7,9 +7,8 @@ import jakarta.persistence.*;
 public class Status {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "status_id")
-    private Integer statusId; // 💡 status_id 是 Integer
+    private Integer statusId; // status_id 是 Integer
 
     @Column(name = "status_type", nullable = false)
     private String statusType; // Career 或 Relationship
@@ -17,7 +16,7 @@ public class Status {
     @Column(name = "status_value", nullable = false, unique = true)
     private String statusValue; // EMPLOYED, SINGLE 等
 
-    // --- Getter 和 Setter (省略，請自行生成) ---
+    
     public Integer getStatusId() { return statusId; }
     public void setStatusId(Integer statusId) { this.statusId = statusId; }
     
