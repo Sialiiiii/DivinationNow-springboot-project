@@ -92,10 +92,12 @@ public class SecurityConfig {
 
             // 配置授權規則
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll() 
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() 
-                // 所有其他路徑都需要認證
-                .anyRequest().authenticated()
+            .requestMatchers("/auth/**").permitAll() 
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() 
+            .requestMatchers(HttpMethod.GET, "/api/user/**").authenticated() 
+            .requestMatchers(HttpMethod.PATCH, "/api/user/profile").authenticated()
+            .requestMatchers("/divination/history/**").authenticated()
+            .anyRequest().authenticated()
             );
             
         return http.build();
@@ -109,7 +111,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         
         configuration.setAllowedOrigins(List.of("http://localhost:5173")); 
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); 
         

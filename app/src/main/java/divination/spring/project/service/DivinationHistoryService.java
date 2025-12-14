@@ -16,6 +16,8 @@ import divination.spring.project.repository.DivinationLogRepository;
 import divination.spring.project.repository.RuneDoubleLogRepository;
 import divination.spring.project.repository.RuneSingleLogRepository;
 import divination.spring.project.repository.SpecificRuneReadingRepository;
+import divination.spring.project.model.JiaziSign;
+import divination.spring.project.repository.JiaziSignRepository;
 
 @Service
 public class DivinationHistoryService {
@@ -23,18 +25,21 @@ public class DivinationHistoryService {
     private final DivinationLogRepository logRepository;
     private final RuneDoubleLogRepository runeDoubleLogRepository;
     private final SpecificRuneReadingRepository specificRuneReadingRepository;
-    // 假設也有 JiaziSignRepository 等其他 Repository
+    private final JiaziSignRepository jiaziRepository;
+
 
     public DivinationHistoryService(
         DivinationLogRepository logRepository,
         RuneDoubleLogRepository runeDoubleLogRepository,
         RuneSingleLogRepository runeSingleLogRepository, 
-        SpecificRuneReadingRepository specificRuneReadingRepository
+        SpecificRuneReadingRepository specificRuneReadingRepository,
+        JiaziSignRepository jiaziRepository
     ) {
         this.logRepository = logRepository;
         this.runeDoubleLogRepository = runeDoubleLogRepository;
         this.runeSingleLogRepository = runeSingleLogRepository;
         this.specificRuneReadingRepository = specificRuneReadingRepository;
+        this.jiaziRepository = jiaziRepository;
     }
 
     /**
@@ -83,23 +88,22 @@ public class DivinationHistoryService {
                 handleRuneDoubleResult(log, dto);
                 break;
             case "fortunestick_jiazi":
-                dto.setResult(String.format("六十甲子籤 (第 %d 籤)", log.getResultId()));
-                dto.setInterpretation("甲子籤詩的核心解讀查詢邏輯待實作。");
+                handleJiaziResult(log, dto);
                 break;
             default:
                 dto.setResult("未知占卜方式");
                 dto.setInterpretation("無詳細解釋。");
         }
     }
+
     // --- 盧恩符文單顆結果處理 ---
     private void handleRuneOneResult(DivinationLog log, DivinationHistoryDTO dto) {
-        // ⭐ 修正點 1: 將 Integer 轉換為 Long (解決錯誤 #1)
         Optional<RuneOrientation> optionalRune = runeSingleLogRepository.findById(log.getResultId().longValue()); 
         
         if (optionalRune.isPresent()) {
             RuneOrientation rune = optionalRune.get();
             String orientation = rune.getIsReversed() == 1 ? "逆位" : "正位";
-            dto.setResult(String.format("盧恩符文 (單顆)：%s (%s)", rune.getFullNameZh(), orientation));
+            dto.setResult(String.format("%s", rune.getFullNameZh(), orientation));
             dto.setInterpretation(rune.getRuneGeneralMeaning());
         } else {
             dto.setResult("盧恩符文結果缺失");
@@ -122,19 +126,19 @@ public class DivinationHistoryService {
                 .map(SpecificRuneReading::getInterpretationText)
                 .orElse("無解釋");
 
-            String result1 = getRuneNameFromSpecificReading(doubleLog.getRune1SpecificReadingId()) + " (現況)";
+            String result1 = getRuneNameFromSpecificReading(doubleLog.getRune1SpecificReadingId());
 
             // 查詢第二張牌 (建議/指引) 的細節
             String interpretation2 = specificRuneReadingRepository.findById(doubleLog.getRune2SpecificReadingId())
                 .map(SpecificRuneReading::getInterpretationText)
                 .orElse("無解釋");
                 
-            String result2 = getRuneNameFromSpecificReading(doubleLog.getRune2SpecificReadingId()) + " (建議)";
+            String result2 = getRuneNameFromSpecificReading(doubleLog.getRune2SpecificReadingId());
 
 
-            dto.setResult(String.format("盧恩符文 (雙顆)：%s, %s", result1, result2));
+            dto.setResult(String.format("%s,%s", result1, result2));
             dto.setInterpretation(
-                String.format("【牌一：現況】\n%s\n\n【牌二：建議】\n%s", interpretation1, interpretation2)
+                String.format("【牌一】\n%s\n\n【牌二】\n%s", interpretation1, interpretation2)
             );
 
         } else {
@@ -154,5 +158,33 @@ public class DivinationHistoryService {
                 return String.format("%s %s", rune.getFullNameZh(), orientation);
             })
             .orElse("未知符文");
+    }
+
+    // --- 六十甲子籤結果處理 ---
+    private void handleJiaziResult(DivinationLog log, DivinationHistoryDTO dto) {
+
+        Long jiaziSignId = log.getResultId().longValue(); 
+        Optional<JiaziSign> optionalStick = jiaziRepository.findById(jiaziSignId);
+
+        if (optionalStick.isPresent()) {
+            JiaziSign stick = optionalStick.get();
+            
+            // 1. 設置 Result 欄位 (在表格中顯示籤號和籤詩首句)
+            // 假設 poeticVerse 是長文本，取出首句作為摘要
+            String summary = stick.getPoeticVerse().split("，")[0]; 
+            dto.setResult(String.format("第 %d 籤", stick.getSignNumber(), summary));
+            
+            // 2. 設置 Interpretation 欄位 (使用特殊分隔符號 ||| 傳輸結構化內容)
+            String interpretationText = String.format(
+                "%s|||%s|||%s", // 籤詩 ||| 核心解說 ||| 詳細解說
+                stick.getPoeticVerse(),
+                stick.getMeaningCore(),
+                stick.getMeaningDetail()
+            );
+            dto.setInterpretation(interpretationText);
+        } else {
+            dto.setResult(String.format("六十甲子籤 (籤號:%d) 結果缺失", log.getResultId()));
+            dto.setInterpretation("無法找到該籤詩詳細內容。");
+        }
     }
 }

@@ -1,5 +1,5 @@
 package divination.spring.project.dto;
-
+import divination.spring.project.service.StatusMapping;
 import divination.spring.project.model.Status;
 
 /**
@@ -21,6 +21,7 @@ public class StatusOptionDTO {
         this.id = status.getStatusId();
         this.type = status.getStatusType();
         this.value = status.getStatusValue();
+        this.value = StatusMapping.getChineseName(status.getStatusValue());
     }
     
     // --- Getters (供 JSON 序列化使用) ---

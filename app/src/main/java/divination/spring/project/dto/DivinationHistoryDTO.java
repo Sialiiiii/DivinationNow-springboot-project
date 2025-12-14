@@ -1,4 +1,3 @@
-// DivinationHistoryDTO.java (新檔案)
 package divination.spring.project.dto;
 
 import divination.spring.project.model.DivinationLog;

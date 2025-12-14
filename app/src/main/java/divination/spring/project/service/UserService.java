@@ -32,36 +32,41 @@ public class UserService {
      * 根據 ID 查詢用戶資料，並整合狀態名稱 (事業/感情)
      */
     public UserResponse getUserProfile(Long userId) {
-        // 1. 獲取所有狀態，建立查閱地圖 Map<ID, Value>，以利查找名稱
+        // 1. 獲取所有狀態，建立查閱地圖 Map<ID, Value (英文代碼)>
         Map<Integer, String> statusMap = statusRepository.findAll().stream()
-            .collect(Collectors.toMap(Status::getStatusId, Status::getStatusValue));
+            // statusMap 儲存的是狀態 ID 對應的英文代碼 (e.g., 1 -> "STUDENT")
+            .collect(Collectors.toMap(Status::getStatusId, Status::getStatusValue)); 
 
         // 2. 查詢用戶
         User user = userRepository.findById(userId)
-            // 實際應用中應拋出 NotFound 異常，這裡用 RuntimeException 簡化
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId)); 
 
-        // 3. 轉換為 Response DTO 並整合狀態名稱
+        // 3. 轉換為 Response DTO (包含性別的中文轉換)
         UserResponse response = new UserResponse(user);
         
         // 整合事業狀態名稱
         if (user.getCareerStatusId() != null) {
-            response.setCareerStatusName(statusMap.get(user.getCareerStatusId()));
+            String englishValue = statusMap.get(user.getCareerStatusId());
+            // ⭐ 修正點 1: 使用 StatusMapping 轉換為中文名稱
+            response.setCareerStatusName(StatusMapping.getChineseName(englishValue));
         }
+        
         // 整合感情狀態名稱
         if (user.getRelationshipStatusId() != null) {
-            response.setRelationshipStatusName(statusMap.get(user.getRelationshipStatusId()));
+            String englishValue = statusMap.get(user.getRelationshipStatusId());
+            // ⭐ 修正點 2: 使用 StatusMapping 轉換為中文名稱
+            response.setRelationshipStatusName(StatusMapping.getChineseName(englishValue));
         }
 
         return response;
     }
 
     /**
-     * 獲取所有狀態選項 (供前端下拉選單使用)
+     * 獲取所有狀態選項 (這裡 StatusOptionDTO 內部會調用 StatusMapping 轉換為中文)
      */
     public List<StatusOptionDTO> getAllStatusOptions() {
         return statusRepository.findAll().stream()
-            .map(StatusOptionDTO::new)
+            .map(StatusOptionDTO::new) // StatusOptionDTO 構造函數會執行中文轉換
             .collect(Collectors.toList());
     }
 
@@ -70,34 +75,34 @@ public class UserService {
     /**
      * 更新用戶的個人資料和狀態
      */
-    @Transactional
+    @Transactional // ⭐ 確保事務開啟，實體變更會被追蹤
     public UserResponse updateProfile(Long userId, UserUpdateRequest request) {
+        // 1. 查詢要更新的用戶實體
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // ⭐ 修正點 3: 補齊所有的更新邏輯！ ⭐
         
-        // 1. 更新暱稱 (只更新非空值)
+        // 2. 更新暱稱 (只更新非空值)
         if (request.getUsername() != null && !request.getUsername().isEmpty()) {
             user.setUsername(request.getUsername());
         }
         
-        // 2. 更新性別
+        // 3. 更新性別 (Gender)
         if (request.getGender() != null) {
             user.setGender(request.getGender());
         }
         
-        // 3. 更新事業狀態 ID
-        if (request.getCareerStatusId() != null) {
-            user.setCareerStatusId(request.getCareerStatusId());
-        }
+        // 4. 更新事業狀態 ID (ID 可以設為 null，代表清除狀態)
+        user.setCareerStatusId(request.getCareerStatusId());
         
-        // 4. 更新感情狀態 ID
-        if (request.getRelationshipStatusId() != null) {
-            user.setRelationshipStatusId(request.getRelationshipStatusId());
-        }
+        // 5. 更新感情狀態 ID
+        user.setRelationshipStatusId(request.getRelationshipStatusId());
+
+        // 6. 儲存實體：雖然有 @Transactional，但明確調用 save 可以確保數據立即同步
+        userRepository.save(user); 
         
-        userRepository.save(user);
-        
-        // 重新調用查詢方法，整合最新的狀態名稱後返回
+        // 7. 重新調用查詢方法，整合最新的狀態名稱後返回
         return getUserProfile(userId);
     }
 }

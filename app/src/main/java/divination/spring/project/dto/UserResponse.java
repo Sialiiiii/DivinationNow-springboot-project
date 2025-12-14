@@ -3,6 +3,7 @@ package divination.spring.project.dto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import divination.spring.project.model.User;
+import divination.spring.project.service.StatusMapping;
 
 public class UserResponse {
     
@@ -54,14 +55,12 @@ public class UserResponse {
     public UserResponse(User user) {
         this.id = user.getId();
         this.email = user.getEmail();
-        
-        // ⭐ 修正點 4: 必須調用您在 User 實體中定義的 JPA 暱稱 Getter
         this.username = user.getUsernameJPA(); 
-
-        // 修正點 5: 新增性別賦值
-        this.gender = user.getGender();
-
-        // 修正點 6: 保持時間格式化邏輯
+        if (user.getGender() != null) {
+            this.gender = StatusMapping.getChineseName(user.getGender());
+        } else {
+            this.gender = "未填寫";
+        }
         LocalDateTime date = user.getCreatedAt(); 
         this.memberSince = date != null ? date.format(DATE_FORMATTER) : "N/A";
         
