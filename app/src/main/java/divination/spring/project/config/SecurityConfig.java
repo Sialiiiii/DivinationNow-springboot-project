@@ -97,6 +97,9 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/user/**").authenticated() 
             .requestMatchers(HttpMethod.PATCH, "/api/user/profile").authenticated()
             .requestMatchers("/divination/history/**").authenticated()
+            .requestMatchers(HttpMethod.GET, "/posts").permitAll()
+            .requestMatchers(HttpMethod.POST, "/posts").authenticated()
+            .requestMatchers(HttpMethod.PATCH, "/posts/**").authenticated()
             .anyRequest().authenticated()
             );
             

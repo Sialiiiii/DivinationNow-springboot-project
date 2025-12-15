@@ -113,13 +113,10 @@ public class DivinationHistoryService {
     
     // --- 盧恩符文雙顆結果處理 ---
     private void handleRuneDoubleResult(DivinationLog log, DivinationHistoryDTO dto) {
-        // longValue() 轉換已在先前修正中完成，此處保持正確
         Optional<RuneDoubleLog> optionalDoubleLog = runeDoubleLogRepository.findById(log.getResultId().longValue()); 
         
         if (optionalDoubleLog.isPresent()) {
             RuneDoubleLog doubleLog = optionalDoubleLog.get();
-            
-            // ... (查詢兩張牌的專屬解讀 ID)
             
             // 查詢第一張牌 (現況/基礎) 的細節
             String interpretation1 = specificRuneReadingRepository.findById(doubleLog.getRune1SpecificReadingId())
