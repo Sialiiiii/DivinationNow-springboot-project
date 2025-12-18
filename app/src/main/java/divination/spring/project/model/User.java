@@ -43,6 +43,9 @@ public class User implements UserDetails { // 實作 UserDetails 介面
 
     @Column(name = "relationship_status_id") 
     private Integer relationshipStatusId;
+
+    @Transient 
+    private boolean blacklisted;
     
     // ===============================================
 
@@ -92,6 +95,9 @@ public class User implements UserDetails { // 實作 UserDetails 介面
 
     public Integer getRelationshipStatusId() { return relationshipStatusId; }
     public void setRelationshipStatusId(Integer relationshipStatusId) { this.relationshipStatusId = relationshipStatusId; }
+
+    public boolean isBlacklisted() { return blacklisted; }
+    public void setBlacklisted(boolean blacklisted) { this.blacklisted = blacklisted; }
 
 
     // --- UserDetails 介面實現 (關鍵) ---

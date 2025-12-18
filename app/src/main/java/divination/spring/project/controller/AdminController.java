@@ -1,15 +1,26 @@
 package divination.spring.project.controller;
 
-import divination.spring.project.dto.AdminPostDTO;
-import divination.spring.project.model.Admin; 
-import divination.spring.project.service.AdminService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize; 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import divination.spring.project.dto.AdminPostDTO;
+import divination.spring.project.model.Admin;
+import divination.spring.project.model.User;
+import divination.spring.project.model.UserBlacklist;
+import divination.spring.project.service.AdminService;
 
 @RestController
 @RequestMapping("/admin") 
@@ -87,9 +98,38 @@ public class AdminController {
      * DELETE /admin/blacklist/{userId} - 移出黑名單
      */
     @DeleteMapping("/blacklist/{userId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 💡 修正點：一致化
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> unblacklistUser(@PathVariable Long userId) {
         boolean success = adminService.unblacklistUser(userId);
         return success ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+
+    /**
+     * GET /admin/users - 獲取所有會員列表
+     */
+    @GetMapping("/users")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<User>> getAllUsersForAdmin() {
+        // 假設你在 AdminService 已經寫好 findAllUsers 方法
+        List<User> users = adminService.findAllUsers(); 
+        return ResponseEntity.ok(users);
+    }
+    
+    /**
+     * GET /admin/blacklist/detail/{userId} - 獲取特定用戶的黑名單詳細資訊
+     */
+    @GetMapping("/blacklist/detail/{userId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> getBlacklistDetail(@PathVariable Long userId) {
+        // 假設你在 AdminService 實作了 getBlacklistDetail 方法
+        Optional<UserBlacklist> detail = adminService.getBlacklistDetail(userId);
+        
+        if (detail.isPresent()) {
+            return ResponseEntity.ok(detail.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

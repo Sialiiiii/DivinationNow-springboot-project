@@ -26,7 +26,6 @@ public class AdminService {
     private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
 
-    // 假設您已有 PostRepository, PostLikeRepository, UserRepository
     public AdminService(PostRepository postRepository, 
                         UserBlacklistRepository blacklistRepository,
                         PostLikeRepository postLikeRepository,
@@ -37,23 +36,19 @@ public class AdminService {
         this.userRepository = userRepository;
     }
     
-    // --- 貼文管理 ---
+    // ==================== 貼文管理 ====================
 
     /**
      * 獲取所有貼文供管理員審查
      */
     public List<AdminPostDTO> getAllPostsForAdmin() {
-        // 獲取所有貼文，按時間倒序排序
         List<Post> posts = postRepository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
 
-        // 獲取所有相關用戶ID
         Set<Long> userIds = posts.stream().map(Post::getUserId).collect(Collectors.toSet());
         
-        // 預先獲取用戶名 (假設您的 User Entity 有 getUsernameJPA() 方法來獲取暱稱)
         Map<Long, String> usernames = userRepository.findAllById(userIds)
                 .stream().collect(Collectors.toMap(User::getId, User::getUsernameJPA)); 
 
-        // 預先獲取黑名單用戶ID列表
         Set<Long> blacklistedUserIds = blacklistRepository.findAll().stream()
                 .map(UserBlacklist::getUserId).collect(Collectors.toSet());
 
@@ -75,13 +70,12 @@ public class AdminService {
     }
 
     /**
-     * 刪除貼文（供管理員使用）
+     * 刪除貼文
      */
     @Transactional
     public boolean deletePostByAdmin(Long postId) {
         Optional<Post> post = postRepository.findById(postId);
         if (post.isPresent()) {
-            // 刪除所有相關的讚記錄 (假設 PostLikeRepository 有 findByPostId 方法)
             postLikeRepository.deleteAll(postLikeRepository.findByPostId(postId));
             postRepository.delete(post.get());
             return true;
@@ -89,7 +83,7 @@ public class AdminService {
         return false;
     }
     
-    // --- 黑名單管理 ---
+    // ==================== 黑名單管理 ====================
 
     /**
      * 將用戶加入黑名單
@@ -97,13 +91,12 @@ public class AdminService {
     @Transactional
     public boolean blacklistUser(Long userId, Integer adminId, String reason) {
         if (blacklistRepository.existsByUserId(userId)) {
-            return false; // 已經在黑名單中
+            return false;
         }
         
         UserBlacklist blacklist = new UserBlacklist();
         blacklist.setUserId(userId);
         blacklist.setReason(reason != null ? reason : "違反版規");
-        // ⭐ 將 Admin ID (Integer) 設置到 UserBlacklist 的 Long 欄位
         blacklist.setLockedByAdminId(adminId.longValue()); 
         
         blacklistRepository.save(blacklist);
@@ -115,12 +108,36 @@ public class AdminService {
      */
     @Transactional
     public boolean unblacklistUser(Long userId) {
-        // ⭐ 假設 UserBlacklistRepository 已經新增了 findByUserId(Long userId) 方法
         Optional<UserBlacklist> record = blacklistRepository.findByUserId(userId); 
         if (record.isPresent()) {
             blacklistRepository.delete(record.get());
             return true;
         }
         return false;
+    }
+
+    /**
+     * 獲取特定用戶的黑名單詳細資訊 (💡 前端查看原因用)
+     */
+    public Optional<UserBlacklist> getBlacklistDetail(Long userId) {
+        return blacklistRepository.findByUserId(userId);
+    }
+
+    /**
+     * 獲取所有會員列表 (已包含黑名單狀態標記)
+     */
+    public List<User> findAllUsers() {
+        List<User> allUsers = userRepository.findAll();
+        
+        Set<Long> blacklistedUserIds = blacklistRepository.findAll()
+                .stream()
+                .map(UserBlacklist::getUserId)
+                .collect(Collectors.toSet());
+
+        allUsers.forEach(user -> {
+            user.setBlacklisted(blacklistedUserIds.contains(user.getId()));
+        });
+
+        return allUsers;
     }
 }
