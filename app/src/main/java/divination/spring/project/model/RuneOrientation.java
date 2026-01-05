@@ -39,6 +39,7 @@ public class RuneOrientation {
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
 
+  // --- Getters and Setters  ---
   public long getOrientationId() { return orientationId; }
   public void setOrientationId(long orientationId) { this.orientationId = orientationId; }
 

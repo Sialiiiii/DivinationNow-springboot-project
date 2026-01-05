@@ -7,7 +7,6 @@ public class RuneOneLogRequest {
     @JsonProperty("orientation_id")
     private Long orientationId; 
 
-    // Getter and Setter
     public Long getOrientationId() {
         return orientationId;
     }
@@ -16,6 +15,5 @@ public class RuneOneLogRequest {
         this.orientationId = orientationId;
     }
 
-    // 實作無參數建構函式
     public RuneOneLogRequest() {}
 }

@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 
 public class AdminPostDTO {
     private Long postId;
-    private Long userId; // ⭐ 發文用戶的真實 ID
+    private Long userId;
     private String username;
     private String content;
     private Integer loveCount;
     private Integer emotionCount;
     private Integer funnyCount;
     private LocalDateTime createdAt;
-    private boolean isBlacklisted; // ⭐ 該用戶是否已被黑名單
+    private boolean isBlacklisted;
 
     // --- Getters and Setters ---
     public Long getPostId() { return postId; }

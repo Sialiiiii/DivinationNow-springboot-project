@@ -48,11 +48,9 @@ public class DivinationHistoryController {
 
     /**
      * PATCH /divination/history/{logId}
-     * ⭐ 修正接口: 使用 PATCH 進行部分更新
-     * 更新占卜紀錄的問題敘述 (question)
      * 接收的 Payload 格式：{"question": "新問題"}
      */
-    @PatchMapping("/{logId}") // ⭐ 改為 @PatchMapping
+    @PatchMapping("/{logId}")
     public ResponseEntity<Void> updateQuestion(
         @PathVariable Long logId,
         @RequestBody Map<String, String> body,
@@ -71,10 +69,10 @@ public class DivinationHistoryController {
         boolean success = historyService.updateQuestion(logId, userPrincipal.getId(), newQuestion);
         
         if (success) {
-            // 200 OK，更新成功
+            // 200 OK (更新成功)
             return ResponseEntity.ok().build();
         } else {
-            // 404 Not Found，該 Log ID 不存在或不屬於該使用者
+            // 404 Not Found (Log ID 不存在或不屬於該使用者)
             return ResponseEntity.notFound().build(); 
         }
     }

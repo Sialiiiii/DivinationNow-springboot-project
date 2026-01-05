@@ -33,14 +33,14 @@ public class AdminController {
     }
 
     /**
-     * GET /admin/posts - 獲取所有貼文
-     * 💡 統一使用 hasAuthority('ROLE_ADMIN')，因為這能與 Admin.java 的字串精確匹配
+     * GET /admin/posts (取所有貼文)
+     * 統一用 hasAuthority('ROLE_ADMIN')，與 Admin.java 的字串匹配
      */
     @GetMapping("/posts")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<AdminPostDTO>> getPostsForAdmin(@AuthenticationPrincipal Admin adminPrincipal) {
         
-        // --- 排查日誌：請務必看後端控制台輸出 ---
+        // --- 排查日誌 ---
         System.out.println("=== 儀表板訪問排查 ===");
         if (adminPrincipal != null) {
             System.out.println("登入管理員: " + adminPrincipal.getUsername());
@@ -55,20 +55,20 @@ public class AdminController {
     }
 
     /**
-     * DELETE /admin/posts/{postId} - 刪除貼文
+     * DELETE /admin/posts/{postId} (刪除貼文)
      */
     @DeleteMapping("/posts/{postId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 💡 修正點：加上 ROLE_ 前綴並改用 Authority
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
         boolean success = adminService.deletePostByAdmin(postId);
         return success ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     /**
-     * POST /admin/blacklist - 將用戶加入黑名單
+     * POST /admin/blacklist (加入黑名單)
      */
     @PostMapping("/blacklist")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 💡 修正點：一致化
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> blacklistUser(
             @RequestBody Map<String, Object> payload,
             @AuthenticationPrincipal Admin adminPrincipal) {
@@ -95,7 +95,7 @@ public class AdminController {
     }
 
     /**
-     * DELETE /admin/blacklist/{userId} - 移出黑名單
+     * DELETE /admin/blacklist/{userId} (移出黑名單)
      */
     @DeleteMapping("/blacklist/{userId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -106,23 +106,23 @@ public class AdminController {
 
 
     /**
-     * GET /admin/users - 獲取所有會員列表
+     * GET /admin/users (獲取所有會員列表)
      */
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<User>> getAllUsersForAdmin() {
-        // 假設你在 AdminService 已經寫好 findAllUsers 方法
+        // findAllUsers 方法寫在 AdminService
         List<User> users = adminService.findAllUsers(); 
         return ResponseEntity.ok(users);
     }
     
     /**
-     * GET /admin/blacklist/detail/{userId} - 獲取特定用戶的黑名單詳細資訊
+     * GET /admin/blacklist/detail/{userId} - (獲取用戶的黑名單詳細資訊)
      */
     @GetMapping("/blacklist/detail/{userId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getBlacklistDetail(@PathVariable Long userId) {
-        // 假設你在 AdminService 實作了 getBlacklistDetail 方法
+        // getBlacklistDetail 方法在 AdminService 
         Optional<UserBlacklist> detail = adminService.getBlacklistDetail(userId);
         
         if (detail.isPresent()) {

@@ -3,7 +3,7 @@ package divination.spring.project.model;
 import jakarta.persistence.*;
 
 /**
- * 對應資料表: specific_rune_readings (特定情境下的符文解讀)
+ * 對應資料表: specific_rune_readings
  */
 @Entity
 @Table(name = "specific_rune_readings")
@@ -19,17 +19,16 @@ public class SpecificRuneReading {
 
 
     @Column(name = "status_id", nullable = false)
-    private Integer statusId; // 匹配資料表欄位 status_id
+    private Integer statusId;
 
     @Column(name = "is_current_status_position", nullable = false)
-    private Integer isCurrentStatusPosition; // 牌位: 1=現況/基礎, 0=建議/指引
+    private Integer isCurrentStatusPosition;
 
     @Column(name = "interpretation_text", nullable = false, columnDefinition = "TEXT")
-    private String interpretationText; // 核心解讀內容
+    private String interpretationText;
 
 
     // --- Getters and Setters ---
-
     public Long getSpecificReadingId() { return specificReadingId; }
     public void setSpecificReadingId(Long specificReadingId) { this.specificReadingId = specificReadingId; }
 

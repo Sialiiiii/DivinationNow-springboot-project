@@ -36,8 +36,7 @@ public class FortuneStickController {
 
     /**
      * GET /divination/fortunestickjiazi (獲取籤詩列表)
-     * 因為在 SecurityConfig 中設置了 .requestMatchers(HttpMethod.GET, "/divination/**").permitAll() 
-     * 所以這是公開 API，不需要認證。
+     * 在 SecurityConfig 中設置了 .requestMatchers(HttpMethod.GET, "/divination/**").permitAll()，所以這是公開 API，不需要認證
      */
     @GetMapping("/fortunestickjiazi")
     public ResponseEntity<List<JiaziSign>> getAllSigns() { 
@@ -47,7 +46,7 @@ public class FortuneStickController {
 
     /**
      * POST /divination/fortunestickjiazi/log
-     * 紀錄六十甲子籤占卜結果
+     * 紀錄甲子籤占卜結果
      */
     @PostMapping("/fortunestickjiazi/log")
     public ResponseEntity<Map<String, Object>> saveJiaziSignLog(
@@ -61,14 +60,14 @@ public class FortuneStickController {
         }
         
         Long userId = currentUser.getId(); 
-        Long signIdLong = request.getSignId(); // 從 DTO 獲取 Long 型別的 ID
+        Long signIdLong = request.getSignId();
         
         if (signIdLong == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Missing required field: signId."));
         }
         
         try {
-            // 將 Long 轉換為 Integer，以匹配 LogService 的方法簽名
+            // Long 轉 Integer
             Integer signId = signIdLong.intValue(); 
             
             DivinationLog mainLog = logService.saveJiaziSignLog(userId, signId);
@@ -79,7 +78,7 @@ public class FortuneStickController {
             );
 
         } catch (ClassCastException e) {
-             // 處理 Long 轉 Integer 溢位（雖然籤詩 ID 不可能溢位，但這是好習慣）
+             // Long 轉 Integer 的溢位處理
              System.err.println("Error casting sign ID: " + e.getMessage());
              return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Invalid sign ID format."));
         } catch (Exception e) {

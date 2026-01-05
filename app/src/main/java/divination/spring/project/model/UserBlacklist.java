@@ -1,5 +1,3 @@
-// divination/spring/project/model/UserBlacklist.java
-
 package divination.spring.project.model;
 
 import jakarta.persistence.*;
@@ -26,6 +24,7 @@ public class UserBlacklist {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    
     // --- Getters and Setters ---
     public Long getBlacklistId() { return blacklistId; }
     public void setBlacklistId(Long blacklistId) { this.blacklistId = blacklistId; }

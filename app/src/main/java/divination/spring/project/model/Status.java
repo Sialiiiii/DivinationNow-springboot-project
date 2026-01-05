@@ -8,13 +8,13 @@ public class Status {
 
     @Id
     @Column(name = "status_id")
-    private Integer statusId; // status_id 是 Integer
+    private Integer statusId;
 
     @Column(name = "status_type", nullable = false)
-    private String statusType; // Career 或 Relationship
+    private String statusType;
 
     @Column(name = "status_value", nullable = false, unique = true)
-    private String statusValue; // EMPLOYED, SINGLE 等
+    private String statusValue;
 
     
     public Integer getStatusId() { return statusId; }

@@ -18,7 +18,7 @@ public interface StatusRepository extends JpaRepository<Status, Integer> {
 
 
     /**
-     * 根據 Status Type 查找所有 Status Entity (例如: 查找所有 Career 狀態)
+     * 根據 Status Type 查找所有 Status Entity 
      */
     List<Status> findByStatusType(String statusType);
 }

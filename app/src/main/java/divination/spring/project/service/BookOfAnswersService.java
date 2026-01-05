@@ -9,7 +9,7 @@ import divination.spring.project.model.BookOfAnswers;
 import divination.spring.project.repository.BookOfAnswersRepository;
 
 /**
- * 處理解答之書的業務邏輯
+ * 解答之書的業務邏輯
  */
 @Service
 public class BookOfAnswersService {
@@ -23,10 +23,9 @@ public class BookOfAnswersService {
 
     /**
      * 取得所有答案內容
-     * @return 包含所有答案物件的列表
+     * @return
      */
     public List<BookOfAnswers> getAllAnswers() {
-        // 直接使用 JpaRepository 提供的 findAll() 方法
         return repository.findAll();
     }
 }

@@ -47,12 +47,12 @@ public class User implements UserDetails { // 實作 UserDetails 介面
     @Transient 
     private boolean blacklisted;
     
-    // ===============================================
+
 
     public User() {
     }
 
-    // 建構子 (不包含 id, role, createdAt)
+    // 建構子 不含 id, role, createdAt
     public User(String email, String password, String username, 
                 LocalDate dateOfBirth, String gender, 
                 Integer careerStatusId, Integer relationshipStatusId) {
@@ -65,7 +65,7 @@ public class User implements UserDetails { // 實作 UserDetails 介面
         this.relationshipStatusId = relationshipStatusId;
     }
 
-    // --- Entity Getter 和 Setter (用於 JPA) ---
+    // --- Getters and Setters ---
     public Long getId(){ return id; }
     public void setId(Long id) { this.id = id; }
     
@@ -74,8 +74,7 @@ public class User implements UserDetails { // 實作 UserDetails 介面
 
     public void setPassword(String password) { this.password = password; }
     
-    // 🚀 修正點：JPA Getter for 暱稱 (username)
-    public String getUsernameJPA() { return username; } // 這是暱稱的 Getter
+    public String getUsernameJPA() { return username; } // 暱稱Getter
     
     public void setUsername(String username) { this.username = username; } 
     
@@ -100,8 +99,8 @@ public class User implements UserDetails { // 實作 UserDetails 介面
     public void setBlacklisted(boolean blacklisted) { this.blacklisted = blacklisted; }
 
 
-    // --- UserDetails 介面實現 (關鍵) ---
-    
+    // --- UserDetails 介面實現---
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role));
@@ -109,10 +108,10 @@ public class User implements UserDetails { // 實作 UserDetails 介面
 
     @Override
     public String getPassword() {
-        return password; // 返回密碼雜湊
+        return password; 
     }
     
-    // 🚀 關鍵修正：將帳號設置為 Email，這是 Spring Security 比對登入憑證的依據
+
     @Override
     public String getUsername() {
         return email; 

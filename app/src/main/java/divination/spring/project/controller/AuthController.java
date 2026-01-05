@@ -24,7 +24,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    // 註冊邏輯 (保持不變)
+    // 註冊邏輯
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         try {

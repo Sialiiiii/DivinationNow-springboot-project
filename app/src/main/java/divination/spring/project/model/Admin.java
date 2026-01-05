@@ -8,13 +8,13 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "administrators") // 匹配您的資料表名
+@Table(name = "administrators")
 public class Admin implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "admin_id")
-    private Integer id; // 根據您的表結構使用 Integer
+    private Integer id;
 
     @Column(name = "admin_username", unique = true, nullable = false)
     private String username;
@@ -33,7 +33,6 @@ public class Admin implements UserDetails {
     public Boolean getIsSuperAdmin() { return isSuperAdmin; }
     public void setIsSuperAdmin(Boolean isSuperAdmin) { this.isSuperAdmin = isSuperAdmin; }
     
-    // --- UserDetails 實現 ---
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -42,12 +41,12 @@ public class Admin implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password; // 返回密碼雜湊
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return username; // 使用 admin_username 登入
+        return username;
     }
 
     @Override public boolean isAccountNonExpired() { return true; }

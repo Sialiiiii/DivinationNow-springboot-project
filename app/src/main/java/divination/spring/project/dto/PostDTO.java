@@ -1,5 +1,3 @@
-// divination/spring/project/dto/PostDTO.java
-
 package divination.spring.project.dto;
 
 import java.time.LocalDateTime;
@@ -7,16 +5,16 @@ import java.time.LocalDateTime;
 public class PostDTO {
     private Long postId;
     private Long userId;
-    private String username; // 發文者名稱
+    private String username;
     private String content;
     private Integer loveCount;
     private Integer emotionCount;
     private Integer funnyCount;
     private LocalDateTime createdAt;
-    private String userReactionType; // 當前登入用戶對此貼文按的表情符號 (e.g., "LOVE", "FUNNY")
-    private boolean isPostOwnedByCurrentUser; // 是否為當前用戶發布
+    private String userReactionType;
+    private boolean isPostOwnedByCurrentUser;
     
-    // --- Getters and Setters ---
+
     public Long getPostId() { return postId; }
     public void setPostId(Long postId) { this.postId = postId; }
     public Long getUserId() { return userId; }

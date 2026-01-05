@@ -24,9 +24,9 @@ import divination.spring.project.model.User;
 import divination.spring.project.service.AdminDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
 
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity // 啟用 @PreAuthorize
+@Configuration // 啟動時先讀這個檔
+@EnableWebSecurity // 啟動Spring Security
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
@@ -41,13 +41,13 @@ public class SecurityConfig {
     }
 
     /**
-     * 核心安全過濾鏈
+     * 核心過濾
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable) //關閉CSRF防護
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) //開啟跨域許可，不同網址才能連
             
             // 登入配置：讓使用者與管理者共用一個 Filter 入口
             .formLogin(form -> form
@@ -60,7 +60,7 @@ public class SecurityConfig {
                     Object principal = authentication.getPrincipal();
                     String responseBody;
 
-                    // 動態判斷登入者身分
+                    // 判斷登入者身分
                     if (principal instanceof Admin admin) {
                         responseBody = String.format(
                             "{\"id\": %d, \"username\": \"%s\", \"role\": \"ADMIN\", \"message\": \"管理員登入成功\"}", 
@@ -91,19 +91,17 @@ public class SecurityConfig {
                     response.getWriter().write("{\"message\":\"您未登入或 Session 已失效\"}");
                 })
             )
-
+            // 權限分級
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**", "/admin/auth/**").permitAll() 
+                .requestMatchers(HttpMethod.GET, "/divination/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() 
-                
-                // 💡 修正點：使用 hasAuthority 並寫全稱 ROLE_ADMIN
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                
-                // 保留你的占卜歷史配置
                 .requestMatchers("/divination/history/**").authenticated()
-                
                 .requestMatchers(HttpMethod.GET, "/api/user/**").authenticated() 
                 .requestMatchers(HttpMethod.PATCH, "/api/user/profile").authenticated()
+                .requestMatchers(HttpMethod.GET, "/posts").permitAll() 
+                .requestMatchers(HttpMethod.POST, "/posts").authenticated()
                 .anyRequest().authenticated()
             );
 
@@ -114,6 +112,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // 身分驗證器，設定驗證方法
     @Bean
     public DaoAuthenticationProvider userAuthenticationProvider(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -130,13 +129,15 @@ public class SecurityConfig {
         return authProvider;
     }
 
+
+    // 跨域白名單 (CORS)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173")); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true); 
+        configuration.setAllowCredentials(true);  // 允許前端帶 Cookie 過來
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

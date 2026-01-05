@@ -36,7 +36,7 @@ public class RuneOneController {
 
     /**
      * GET /divination/runesone
-     * 獲取所有盧恩符文的狀態資料 (正位和逆位)
+     * 獲取所有盧恩符文的狀態資料 (正位+逆位)
      */
     @GetMapping("/runesone")
     public ResponseEntity<List<RuneOrientation>> getAllRuneData() {
@@ -50,8 +50,6 @@ public class RuneOneController {
 /**
      * POST /divination/runesone/log
      * 紀錄盧恩單顆占卜結果
-     * * ⭐️ 修正：直接接收 orientationId 作為請求體，不再使用 DTO
-     * ⭐️ 修正：不再依賴前端傳遞 user_id
      */
     @PostMapping("/runesone/log")
     public ResponseEntity<Map<String, Object>> saveRuneLog(
@@ -64,7 +62,7 @@ public class RuneOneController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "User not authenticated. Please log in."));
         }
         
-        // 2. 獲取核心參數
+        // 獲取核心參數
         Long userId = currentUser.getId();
         Long orientationIdLong = request.getOrientationId();
         
@@ -83,7 +81,6 @@ public class RuneOneController {
             );
 
         } catch (ClassCastException e) {
-             // 處理 Long 轉 Integer 溢位（雖然籤詩 ID 不可能溢位，但這是好習慣）
              System.err.println("Error casting sign ID: " + e.getMessage());
              return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Invalid sign ID format."));
         } catch (Exception e) {

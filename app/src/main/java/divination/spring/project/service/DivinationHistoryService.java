@@ -46,7 +46,6 @@ public class DivinationHistoryService {
      * 獲取單個使用者所有 DivinationLog 紀錄，並轉換為包含詳細結果的 DTO
      */
     public List<DivinationHistoryDTO> getHistoryRecords(Long userId) {
-        // findByUserIdOrderByDivinationTimeDesc 假設已在 DivinationLogRepository 中聲明
         List<DivinationLog> logs = logRepository.findByUserIdOrderByDivinationTimeDesc(userId);
         
         return logs.stream()
@@ -59,25 +58,22 @@ public class DivinationHistoryService {
     }
 
     /**
-     * 更新占卜紀錄的問題敘述 (question)
+     * 更新占卜紀錄的問題內容
      */
     @Transactional
     public boolean updateQuestion(Long logId, Long userId, String newQuestion) {
-        // findByLogIdAndUserId 假設已在 DivinationLogRepository 中聲明
         Optional<DivinationLog> optionalLog = logRepository.findByLogIdAndUserId(logId, userId);
 
         if (optionalLog.isPresent()) {
             DivinationLog log = optionalLog.get();
-            log.setQuestion(newQuestion); // setQuestion 已在 DivinationLog 中添加
+            log.setQuestion(newQuestion);
             logRepository.save(log);
             return true;
         }
         return false;
     }
     
-    /**
-     * 輔助方法：根據 result_table 查詢詳細結果和解釋，並設置到 DTO 中
-     */
+
     private void getDetailedResult(DivinationLog log, DivinationHistoryDTO dto) {
         
         switch (log.getResultTable()) {
@@ -95,6 +91,7 @@ public class DivinationHistoryService {
                 dto.setInterpretation("無詳細解釋。");
         }
     }
+
 
     // --- 盧恩符文單顆結果處理 ---
     private void handleRuneOneResult(DivinationLog log, DivinationHistoryDTO dto) {
@@ -118,14 +115,14 @@ public class DivinationHistoryService {
         if (optionalDoubleLog.isPresent()) {
             RuneDoubleLog doubleLog = optionalDoubleLog.get();
             
-            // 查詢第一張牌 (現況/基礎) 的細節
+            // 第一張牌細節
             String interpretation1 = specificRuneReadingRepository.findById(doubleLog.getRune1SpecificReadingId())
                 .map(SpecificRuneReading::getInterpretationText)
                 .orElse("無解釋");
 
             String result1 = getRuneNameFromSpecificReading(doubleLog.getRune1SpecificReadingId());
 
-            // 查詢第二張牌 (建議/指引) 的細節
+            // 第二張牌細節
             String interpretation2 = specificRuneReadingRepository.findById(doubleLog.getRune2SpecificReadingId())
                 .map(SpecificRuneReading::getInterpretationText)
                 .orElse("無解釋");
@@ -144,11 +141,9 @@ public class DivinationHistoryService {
         }
     }
     
-    //輔助方法：統一查詢符文名稱的邏輯
+    // 統一查詢符文名稱的邏輯
     private String getRuneNameFromSpecificReading(Integer specificReadingId) {
         return specificRuneReadingRepository.findById(specificReadingId)
-        // flatMap 查詢 SpecificRuneReading 內部的 orientationId
-        // 將 Integer 轉換為 Long 
         .flatMap(reading -> runeSingleLogRepository.findById(reading.getOrientationId().longValue())) 
         .map(rune -> {
                 String orientation = rune.getIsReversed() == 1 ? "逆位" : "正位";
@@ -166,12 +161,9 @@ public class DivinationHistoryService {
         if (optionalStick.isPresent()) {
             JiaziSign stick = optionalStick.get();
             
-            // 1. 設置 Result 欄位 (在表格中顯示籤號和籤詩首句)
-            // 假設 poeticVerse 是長文本，取出首句作為摘要
             String summary = stick.getPoeticVerse().split("，")[0]; 
             dto.setResult(String.format("第 %d 籤", stick.getSignNumber(), summary));
             
-            // 2. 設置 Interpretation 欄位 (使用特殊分隔符號 ||| 傳輸結構化內容)
             String interpretationText = String.format(
                 "%s|||%s|||%s", // 籤詩 ||| 核心解說 ||| 詳細解說
                 stick.getPoeticVerse(),

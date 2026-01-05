@@ -5,9 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * 處理 rune_double_logs 資料表的 CRUD 操作
+ * 處理 rune_double_logs 資料表
  */
 @Repository
 public interface RuneDoubleLogRepository extends JpaRepository<RuneDoubleLog, Long> {
-    // JpaRepository 提供了 save() 方法用於儲存紀錄
 }

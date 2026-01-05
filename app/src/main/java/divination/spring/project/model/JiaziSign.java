@@ -13,26 +13,26 @@ public class JiaziSign {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "jiazi_sign_id") // 保持資料庫欄位名稱
+    @Column(name = "jiazi_sign_id")
     private Long jiaziSignId;
 
     @Column(name = "sign_number", nullable = false)
-    private Integer signNumber; // 籤號 1-60
+    private Integer signNumber;
 
     @Column(name = "poetic_verse", nullable = false, columnDefinition = "TEXT")
-    private String poeticVerse; // 籤詩本文
+    private String poeticVerse; 
 
     @Column(name = "meaning_core", nullable = false, columnDefinition = "TEXT")
-    private String meaningCore; // 籤詩核心解說
+    private String meaningCore; 
 
     @Column(name = "meaning_detail", nullable = false, columnDefinition = "TEXT")
-    private String meaningDetail; // 籤詩詳細解說
+    private String meaningDetail;
 
     @Column(name = "image_url", nullable = false, length = 255)
-    private String imageUrl; // 籤筒圖片 URL
+    private String imageUrl;
+
 
     // --- Getters and Setters ---
-
     public Long getJiaziSignId() { return jiaziSignId; }
     public void setJiaziSignId(Long jiaziSignId) { this.jiaziSignId = jiaziSignId; }
 

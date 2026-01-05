@@ -12,7 +12,7 @@ public class DivinationLog {
     private Long logId;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId; // 外鍵，引用 users 表
+    private Long userId;
 
     @Column(name = "divination_type", nullable = false)
     private String divinationType;
@@ -20,16 +20,14 @@ public class DivinationLog {
     @Column(name = "divination_time", nullable = false)
     private LocalDateTime divinationTime = LocalDateTime.now();
 
-    // 多型關聯: 儲存結果 ID
     @Column(name = "result_id", nullable = false)
     private Integer resultId; 
 
-    // 多型關聯: 儲存結果表名 (例如: "rune_orientations")
     @Column(name = "result_table", nullable = false)
     private String resultTable;
     
     @Column(name = "question", columnDefinition = "VARCHAR(255)") 
-    private String question; // 欄位已存在
+    private String question;
 
     // --- Getters and Setters ---
     public Long getLogId() { return logId; }
@@ -46,12 +44,10 @@ public class DivinationLog {
         this.divinationTime = divinationTime;
     }
     
-    // ⭐ 修正點 1: 移除拋出異常的代碼，直接返回欄位值
     public String getQuestion() {
         return question; 
     }
     
-    // ⭐ 修正點 2: 新增 setQuestion(String) 方法 (解決錯誤 #2)
     public void setQuestion(String question) {
         this.question = question;
     }

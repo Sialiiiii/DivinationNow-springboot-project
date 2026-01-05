@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface AdminRepository extends JpaRepository<Admin, Integer> {
-    // 用於 Spring Security 查找管理員
+    // 給 Spring Security 查找管理員
     Optional<Admin> findByUsername(String username);
 }

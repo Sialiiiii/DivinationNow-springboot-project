@@ -29,7 +29,7 @@ public class FortuneStickService {
     /**
      * 根據籤號獲取特定籤詩
      */
-    public Optional<JiaziSign> getSignByNumber(Integer signNumber) { // 🚀 修正類型
+    public Optional<JiaziSign> getSignByNumber(Integer signNumber) {
         return repository.findBySignNumber(signNumber);
     }
 }

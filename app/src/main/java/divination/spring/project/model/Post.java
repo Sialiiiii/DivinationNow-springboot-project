@@ -18,7 +18,6 @@ public class Post {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    // 三種表情符號計數
     @Column(name = "love_count", nullable = false)
     private Integer loveCount = 0;
 
@@ -31,6 +30,7 @@ public class Post {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    
     // --- Getters and Setters ---
     public Long getPostId() { return postId; }
     public void setPostId(Long postId) { this.postId = postId; }

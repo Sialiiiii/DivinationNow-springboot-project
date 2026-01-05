@@ -2,14 +2,12 @@ package divination.spring.project.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull; // <-- 新增
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
-// 註冊請求 DTO
 public class RegisterRequest {
     
-    // 核心帳號資訊
     @NotBlank(message = "Email 不能為空")
     @Email(message = "Email 格式不正確")
     private String email;
@@ -25,13 +23,13 @@ public class RegisterRequest {
     private LocalDate dateOfBirth;
 
     @NotBlank(message = "性別不能為空")
-    private String gender; // 生理性別 (MALE/FEMALE)
+    private String gender;
     
-    @NotBlank(message = "事業狀態不能為空") // 將 "狀態" 改為更具體的 "事業狀態"
-    private String careerStatusValue; // 事業狀態的字串值 (EMPLOYED, STUDENT...)
+    @NotBlank(message = "事業狀態不能為空")
+    private String careerStatusValue; // 事業狀態的字串 (EMPLOYED, STUDENT...)
 
-    @NotBlank(message = "感情狀態不能為空") // 將 "狀態" 改為更具體的 "感情狀態"
-    private String relationshipStatusValue; // 感情狀態的字串值 (SINGLE, MARRIED...)
+    @NotBlank(message = "感情狀態不能為空")
+    private String relationshipStatusValue; // 感情狀態的字串 (SINGLE, MARRIED...)
     
 
     public String getEmail() { return email; }

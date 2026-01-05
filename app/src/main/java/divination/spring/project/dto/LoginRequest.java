@@ -12,7 +12,6 @@ public class LoginRequest {
     @NotBlank(message = "密碼不能為空")
     private String password;
 
-    // --- Getter 和 Setter (請在你的 IDE 中自動生成) ---
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 

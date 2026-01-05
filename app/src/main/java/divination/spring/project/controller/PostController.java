@@ -24,7 +24,7 @@ public class PostController {
 
     /**
      * POST /api/posts - 發布新貼文
-     * Payload: {"content": "我的心境文字..."}
+     * Payload: {"content": "文字內容..."}
      */
     @PostMapping
     public ResponseEntity<?> createPost(
@@ -61,7 +61,6 @@ public class PostController {
     /**
      * PATCH /api/posts/{postId}/reaction - 點讚/取消點讚/更換表情符號
      * Payload: {"reactionType": "LOVE" | "EMOTION" | "FUNNY"}
-     * 返回更新後的計數
      */
     @PatchMapping("/{postId}/reaction")
     public ResponseEntity<?> reactToPost(
@@ -77,7 +76,7 @@ public class PostController {
         if (reactionType == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "缺少 reactionType 參數。"));
         }
-        // 強制檢查 reactionType 是否為有效值
+        
         if (!List.of("LOVE", "EMOTION", "FUNNY").contains(reactionType.toUpperCase())) {
              return ResponseEntity.badRequest().body(Map.of("message", "無效的 reactionType 參數。"));
         }

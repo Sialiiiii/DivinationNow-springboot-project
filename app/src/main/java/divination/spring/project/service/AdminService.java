@@ -36,7 +36,7 @@ public class AdminService {
         this.userRepository = userRepository;
     }
     
-    // ==================== 貼文管理 ====================
+    // 貼文管理
 
     /**
      * 獲取所有貼文供管理員審查
@@ -83,7 +83,8 @@ public class AdminService {
         return false;
     }
     
-    // ==================== 黑名單管理 ====================
+
+    // 黑名單管理
 
     /**
      * 將用戶加入黑名單
@@ -117,14 +118,14 @@ public class AdminService {
     }
 
     /**
-     * 獲取特定用戶的黑名單詳細資訊 (💡 前端查看原因用)
+     * 獲取特定用戶的黑名單詳細資訊
      */
     public Optional<UserBlacklist> getBlacklistDetail(Long userId) {
         return blacklistRepository.findByUserId(userId);
     }
 
     /**
-     * 獲取所有會員列表 (已包含黑名單狀態標記)
+     * 獲取所有會員列表
      */
     public List<User> findAllUsers() {
         List<User> allUsers = userRepository.findAll();

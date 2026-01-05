@@ -20,7 +20,7 @@ public class DivinationHistoryDTO {
         this.method = log.getDivinationType();
         this.time = log.getDivinationTime() != null ? log.getDivinationTime().format(TIME_FORMATTER) : "N/A";
         this.question = log.getQuestion();
-        // result 和 interpretation 將在 Service 層設置，此處省略初始化
+        // result 和 interpretation 在 Service 層設置
     }
     
     // --- Getters ---
@@ -30,8 +30,6 @@ public class DivinationHistoryDTO {
     public String getInterpretation() { return interpretation; }
     public String getTime() { return time; }
     public String getQuestion() { return question; }
-    
-    // ⭐ 修正點：新增所有缺失的 Setter 
     public void setId(Long id) { this.id = id; }
     public void setMethod(String method) { this.method = method; }
     public void setResult(String result) { this.result = result; }

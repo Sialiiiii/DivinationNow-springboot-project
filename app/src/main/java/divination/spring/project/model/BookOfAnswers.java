@@ -10,7 +10,7 @@ import jakarta.persistence.GenerationType;
 import java.time.LocalDateTime;
 
 /**
- * 對應資料表: book_of_answers (解答之書的籤詩內容)
+ * 對應資料表: book_of_answers
  */
 @Entity
 @Table(name = "book_of_answers")
@@ -27,8 +27,8 @@ public class BookOfAnswers {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // --- Getters and Setters ---
 
+    // --- Getters and Setters ---
     public Long getId() {
         return id;
     }

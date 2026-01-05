@@ -3,7 +3,7 @@ package divination.spring.project.model;
 import jakarta.persistence.*;
 
 /**
- * 對應資料表: rune_double_logs (盧恩符文雙顆占卜結果紀錄 仲介表)
+ * 對應資料表: rune_double_logs (仲介表)
  */
 @Entity
 @Table(name = "rune_double_logs")
@@ -12,7 +12,7 @@ public class RuneDoubleLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "double_log_id")
-    private Long logId; // PK (匹配資料表divination_logs的欄位double_log_id)
+    private Long logId; // PK
 
     @Column(name = "rune1_specific_reading_id", nullable = false)
     private Integer rune1SpecificReadingId; 
@@ -21,13 +21,13 @@ public class RuneDoubleLog {
     private Integer rune2SpecificReadingId;
 
     @Column(name = "user_career_status_id")
-    private Integer userCareerStatusId; // 事業狀態 ID (nullable)
+    private Integer userCareerStatusId;
 
     @Column(name = "user_relationship_status_id")
-    private Integer userRelationshipStatusId; // 感情狀態 ID (nullable)
+    private Integer userRelationshipStatusId;
 
-    // --- Getters and Setters (省略建構子) ---
-    
+
+    // --- Getters and Setters  ---
     public Long getLogId() { return logId; }
     public void setLogId(Long logId) { this.logId = logId; }
 

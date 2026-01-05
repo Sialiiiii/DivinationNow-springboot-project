@@ -9,9 +9,5 @@ import divination.spring.project.model.JiaziSign;
 
 @Repository
 public interface JiaziSignRepository extends JpaRepository<JiaziSign, Long> {
-
-    /**
-     * 根據籤號 (1-60) 查找籤詩
-     */
     Optional<JiaziSign> findBySignNumber(Integer signNumber);
 }

@@ -1,4 +1,4 @@
-package divination.spring.project.service; // ⭐ package 宣告修改為 service
+package divination.spring.project.service;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,7 +35,6 @@ public class StatusMapping {
      * 將英文 Status Value 或 Gender 轉換為中文名稱
      */
     public static String getChineseName(String statusValue) {
-        // 如果找不到對應的中文名稱，則返回英文原值 (用於確保未填寫的資料也能通過)
         return STATUS_TO_ZH_MAP.getOrDefault(statusValue, statusValue);
     }
 }
